@@ -2,6 +2,7 @@ from aiogram import Router
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
+
 from states.user_state import UserState
 
 router = Router()
@@ -20,6 +21,8 @@ async def start(message: Message, state: FSMContext):
 
 @router.message(UserState.waiting_for_name)
 async def get_name(message: Message, state: FSMContext):
+    await state.update_data(name=message.text)
+
     await message.answer(
         f"Приятно познакомиться, {message.text}! 🚀\n\n"
         "Сколько тебе лет?"
@@ -30,8 +33,12 @@ async def get_name(message: Message, state: FSMContext):
 
 @router.message(UserState.waiting_for_age)
 async def get_age(message: Message, state: FSMContext):
+    data = await state.get_data()
+    name = data["name"]
+
     await message.answer(
-        f"Супер! Тебе {message.text} лет.\n\n"
+        f"Отлично, {name}! 🎉\n\n"
+        f"Тебе {message.text} лет.\n\n"
         "На этом пока всё 😊"
     )
 
