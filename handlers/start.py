@@ -17,6 +17,7 @@ async def start(message: Message, state: FSMContext):
 
     await state.set_state(UserState.waiting_for_name)
 
+
 @router.message(UserState.waiting_for_name)
 async def get_name(message: Message, state: FSMContext):
     await message.answer(
@@ -25,7 +26,9 @@ async def get_name(message: Message, state: FSMContext):
     )
 
     await state.set_state(UserState.waiting_for_age)
-    @router.message(UserState.waiting_for_age)
+
+
+@router.message(UserState.waiting_for_age)
 async def get_age(message: Message, state: FSMContext):
     await message.answer(
         f"Супер! Тебе {message.text} лет.\n\n"
