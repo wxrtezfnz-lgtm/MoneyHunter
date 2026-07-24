@@ -75,7 +75,7 @@ async def get_goal(message: Message, state: FSMContext):
     )
 
     await state.set_state(UserState.waiting_for_income)
-    @router.message(UserState.waiting_for_income)
+@router.message(UserState.waiting_for_income)
 async def get_income(message: Message, state: FSMContext):
     await state.update_data(income=message.text)
 
