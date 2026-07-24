@@ -44,4 +44,21 @@ async def get_age(message: Message, state: FSMContext):
         reply_markup=activity_keyboard,
     )
 
+    await state.set_state(UserState.waiting_for_activity)
+
+
+@router.message(UserState.waiting_for_activity)
+async def get_activity(message: Message, state: FSMContext):
+    await state.update_data(activity=message.text)
+
+    data = await state.get_data()
+
+    await message.answer(
+        "✅ Анкета заполнена!\n\n"
+        f"👤 Имя: {data['name']}\n"
+        f"🎂 Возраст: {data['age']}\n"
+        f"💼 Занятие: {data['activity']}\n\n"
+        "Скоро я составлю для тебя персональный план заработка 🚀"
+    )
+
     await state.clear()
