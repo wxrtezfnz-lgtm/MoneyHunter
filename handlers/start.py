@@ -4,11 +4,13 @@ from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
 from states.user_state import UserState
+
 from keyboards.main_keyboard import activity_keyboard
 from keyboards.goal_keyboard import goal_keyboard
 from keyboards.income_keyboard import income_keyboard
 
 from database.db import save_user
+from services.advisor import generate_plan
 
 router = Router()
 
@@ -73,14 +75,13 @@ async def get_goal(message: Message, state: FSMContext):
     )
 
     await state.set_state(UserState.waiting_for_income)
-
-
-@router.message(UserState.waiting_for_income)
+    @router.message(UserState.waiting_for_income)
 async def get_income(message: Message, state: FSMContext):
     await state.update_data(income=message.text)
 
     data = await state.get_data()
 
+    # сохраняем пользователя в базу
     save_user(
         telegram_id=message.from_user.id,
         name=data["name"],
@@ -90,15 +91,22 @@ async def get_income(message: Message, state: FSMContext):
         income=data["income"]
     )
 
-    await message.answer(
-        "✅ Анкета заполнена!\n\n"
-        f"👤 Имя: {data['name']}\n"
-        f"🎂 Возраст: {data['age']}\n"
-        f"💼 Занятие: {data['activity']}\n"
-        f"🎯 Цель: {data['goal']}\n"
-        f"💰 Доход: {data['income']}\n\n"
-        "🤖 Данные сохранены!\n"
-        "Скоро я составлю для тебя персональный AI-план заработка 🚀"
-    )
+    # небольшая "анимация"
+    status = await message.answer("🤖 Анализирую твою анкету...")
+
+    import asyncio
+
+    await asyncio.sleep(1)
+    await status.edit_text("🧠 Подбираю лучший путь заработка...")
+
+    await asyncio.sleep(1)
+    await status.edit_text("📈 Формирую персональный план...")
+
+    await asyncio.sleep(1)
+
+    # генерируем план
+    plan = generate_plan(data)
+
+    await status.edit_text(plan)
 
     await state.clear()
