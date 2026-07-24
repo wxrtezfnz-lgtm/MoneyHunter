@@ -17,5 +17,5 @@ async def start(message: Message):
 @router.message()
 async def echo(message: Message):
     await message.answer(
-        f"Ты написал:\n\n{message.text}"
+        f"Приятно познакомиться, {message.text}! 🚀"
     )
