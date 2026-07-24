@@ -40,6 +40,13 @@ async def get_name(message: Message, state: FSMContext):
 
 @router.message(UserState.waiting_for_age)
 async def get_age(message: Message, state: FSMContext):
+
+    if not message.text.isdigit():
+        await message.answer(
+            "❌ Возраст должен быть числом.\n\nНапример: 19"
+        )
+        return
+
     await state.update_data(age=message.text)
 
     data = await state.get_data()
@@ -51,7 +58,6 @@ async def get_age(message: Message, state: FSMContext):
     )
 
     await state.set_state(UserState.waiting_for_activity)
-
 
 @router.message(UserState.waiting_for_activity)
 async def get_activity(message: Message, state: FSMContext):
@@ -107,6 +113,6 @@ async def get_income(message: Message, state: FSMContext):
     # генерируем план
     plan = generate_plan(data)
 
-    await status.edit_text(plan)
+   await status.edit_text(plan, parse_mode="HTML")
 
     await state.clear()
