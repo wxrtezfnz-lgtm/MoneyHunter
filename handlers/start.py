@@ -12,3 +12,10 @@ async def start(message: Message):
         "Добро пожаловать в Money Hunter AI.\n\n"
         "Напиши, как тебя зовут? 😊"
     )
+
+
+@router.message()
+async def echo(message: Message):
+    await message.answer(
+        f"Ты написал:\n\n{message.text}"
+    )
