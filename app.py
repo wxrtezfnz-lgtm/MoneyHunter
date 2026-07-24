@@ -2,9 +2,8 @@ import asyncio
 import os
 
 from aiogram import Bot, Dispatcher
-from aiogram.filters import CommandStart
-from aiogram.types import Message
 from dotenv import load_dotenv
+from handlers.start import router as start_router
 
 load_dotenv()
 
@@ -12,15 +11,9 @@ TOKEN = os.getenv("BOT_TOKEN")
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
+dp.include_router(start_router)
 
 
-@dp.message(CommandStart())
-async def start(message: Message):
-    await message.answer(
-        "🚀 Добро пожаловать в Money Hunter AI!\n\n"
-        "Я помогу тебе найти путь к первым деньгам.\n\n"
-        "Пока это первая версия, но скоро я научусь составлять персональный план заработка."
-    )
 
 
 async def main():
