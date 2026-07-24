@@ -4,6 +4,7 @@ from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
 from states.user_state import UserState
+from keyboards.main_keyboard import activity_keyboard
 
 router = Router()
 
@@ -33,13 +34,14 @@ async def get_name(message: Message, state: FSMContext):
 
 @router.message(UserState.waiting_for_age)
 async def get_age(message: Message, state: FSMContext):
+    await state.update_data(age=message.text)
+
     data = await state.get_data()
-    name = data["name"]
 
     await message.answer(
-        f"Отлично, {name}! 🎉\n\n"
-        f"Тебе {message.text} лет.\n\n"
-        "На этом пока всё 😊"
+        f"Отлично, {data['name']}! 🎉\n\n"
+        "Чем ты сейчас занимаешься?",
+        reply_markup=activity_keyboard,
     )
 
     await state.clear()
