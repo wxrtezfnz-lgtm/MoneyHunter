@@ -5,6 +5,7 @@ from aiogram.fsm.context import FSMContext
 
 from states.user_state import UserState
 from keyboards.main_keyboard import activity_keyboard
+from keyboards.goal_keyboard import goal_keyboard
 
 router = Router()
 
@@ -51,14 +52,27 @@ async def get_age(message: Message, state: FSMContext):
 async def get_activity(message: Message, state: FSMContext):
     await state.update_data(activity=message.text)
 
+    await message.answer(
+        "🎯 Какая у тебя сейчас главная цель?",
+        reply_markup=goal_keyboard,
+    )
+
+    await state.set_state(UserState.waiting_for_goal)
+
+
+@router.message(UserState.waiting_for_goal)
+async def get_goal(message: Message, state: FSMContext):
+    await state.update_data(goal=message.text)
+
     data = await state.get_data()
 
     await message.answer(
         "✅ Анкета заполнена!\n\n"
         f"👤 Имя: {data['name']}\n"
         f"🎂 Возраст: {data['age']}\n"
-        f"💼 Занятие: {data['activity']}\n\n"
-        "Скоро я составлю для тебя персональный план заработка 🚀"
+        f"💼 Занятие: {data['activity']}\n"
+        f"🎯 Цель: {data['goal']}\n\n"
+        "🚀 Скоро я составлю для тебя персональный план заработка!"
     )
 
     await state.clear()
