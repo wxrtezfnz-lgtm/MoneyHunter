@@ -6,6 +6,9 @@ from aiogram.fsm.context import FSMContext
 from states.user_state import UserState
 from keyboards.main_keyboard import activity_keyboard
 from keyboards.goal_keyboard import goal_keyboard
+from keyboards.income_keyboard import income_keyboard
+
+from database.db import save_user
 
 router = Router()
 
@@ -42,7 +45,7 @@ async def get_age(message: Message, state: FSMContext):
     await message.answer(
         f"Отлично, {data['name']}! 🎉\n\n"
         "Чем ты сейчас занимаешься?",
-        reply_markup=activity_keyboard,
+        reply_markup=activity_keyboard
     )
 
     await state.set_state(UserState.waiting_for_activity)
@@ -54,7 +57,7 @@ async def get_activity(message: Message, state: FSMContext):
 
     await message.answer(
         "🎯 Какая у тебя сейчас главная цель?",
-        reply_markup=goal_keyboard,
+        reply_markup=goal_keyboard
     )
 
     await state.set_state(UserState.waiting_for_goal)
@@ -64,15 +67,38 @@ async def get_activity(message: Message, state: FSMContext):
 async def get_goal(message: Message, state: FSMContext):
     await state.update_data(goal=message.text)
 
+    await message.answer(
+        "💰 Какой доход ты хочешь получать?",
+        reply_markup=income_keyboard
+    )
+
+    await state.set_state(UserState.waiting_for_income)
+
+
+@router.message(UserState.waiting_for_income)
+async def get_income(message: Message, state: FSMContext):
+    await state.update_data(income=message.text)
+
     data = await state.get_data()
+
+    save_user(
+        telegram_id=message.from_user.id,
+        name=data["name"],
+        age=data["age"],
+        activity=data["activity"],
+        goal=data["goal"],
+        income=data["income"]
+    )
 
     await message.answer(
         "✅ Анкета заполнена!\n\n"
         f"👤 Имя: {data['name']}\n"
         f"🎂 Возраст: {data['age']}\n"
         f"💼 Занятие: {data['activity']}\n"
-        f"🎯 Цель: {data['goal']}\n\n"
-        "🚀 Скоро я составлю для тебя персональный план заработка!"
+        f"🎯 Цель: {data['goal']}\n"
+        f"💰 Доход: {data['income']}\n\n"
+        "🤖 Данные сохранены!\n"
+        "Скоро я составлю для тебя персональный AI-план заработка 🚀"
     )
 
     await state.clear()
