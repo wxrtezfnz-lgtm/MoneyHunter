@@ -8,7 +8,7 @@ router = Router()
 @router.message(CommandStart())
 async def start(message: Message):
     await message.answer(
-        "🚀 Добро пожаловать в Money Hunter AI!\n\n"
-        "Я помогу тебе найти путь к первым деньгам.\n\n"
-        "Пока это первая версия, но скоро я научусь составлять персональный план заработка."
+        f"👋 Привет, {message.from_user.first_name}!\n\n"
+        "Добро пожаловать в Money Hunter AI.\n\n"
+        "Напиши, как тебя зовут? 😊"
     )
