@@ -12,15 +12,19 @@ from keyboards.income_keyboard import income_keyboard
 from database.db import save_user
 from services.advisor import generate_plan
 
+import asyncio
+
 router = Router()
 
 
 @router.message(CommandStart())
 async def start(message: Message, state: FSMContext):
+    await state.clear()
+
     await message.answer(
         f"👋 Привет, {message.from_user.first_name}!\n\n"
         "Добро пожаловать в Money Hunter AI.\n\n"
-        "Напиши, как тебя зовут? 😊"
+        "Напиши, как тебя зовут 😊"
     )
 
     await state.set_state(UserState.waiting_for_name)
@@ -28,6 +32,7 @@ async def start(message: Message, state: FSMContext):
 
 @router.message(UserState.waiting_for_name)
 async def get_name(message: Message, state: FSMContext):
+
     await state.update_data(name=message.text)
 
     await message.answer(
@@ -59,8 +64,10 @@ async def get_age(message: Message, state: FSMContext):
 
     await state.set_state(UserState.waiting_for_activity)
 
+
 @router.message(UserState.waiting_for_activity)
 async def get_activity(message: Message, state: FSMContext):
+
     await state.update_data(activity=message.text)
 
     await message.answer(
@@ -73,6 +80,7 @@ async def get_activity(message: Message, state: FSMContext):
 
 @router.message(UserState.waiting_for_goal)
 async def get_goal(message: Message, state: FSMContext):
+
     await state.update_data(goal=message.text)
 
     await message.answer(
@@ -81,13 +89,15 @@ async def get_goal(message: Message, state: FSMContext):
     )
 
     await state.set_state(UserState.waiting_for_income)
+
+
 @router.message(UserState.waiting_for_income)
 async def get_income(message: Message, state: FSMContext):
+
     await state.update_data(income=message.text)
 
     data = await state.get_data()
 
-    # сохраняем пользователя в базу
     save_user(
         telegram_id=message.from_user.id,
         name=data["name"],
@@ -97,10 +107,7 @@ async def get_income(message: Message, state: FSMContext):
         income=data["income"]
     )
 
-    # небольшая "анимация"
     status = await message.answer("🤖 Анализирую твою анкету...")
-
-    import asyncio
 
     await asyncio.sleep(1)
     await status.edit_text("🧠 Подбираю лучший путь заработка...")
@@ -110,9 +117,11 @@ async def get_income(message: Message, state: FSMContext):
 
     await asyncio.sleep(1)
 
-    # генерируем план
     plan = generate_plan(data)
 
-   await status.edit_text(plan, parse_mode="HTML")
+    await status.edit_text(
+        plan,
+        parse_mode="HTML"
+    )
 
     await state.clear()
