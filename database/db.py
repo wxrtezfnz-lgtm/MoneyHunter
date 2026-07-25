@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS users(
     activity TEXT,
     goal TEXT,
     income TEXT,
-    experience TEXT
+    experience TEXT,
+    day INTEGER DEFAULT 1
 )
 """)
 
@@ -31,8 +32,17 @@ def save_user(
 
     cursor.execute("""
     INSERT INTO users
-    (telegram_id,name,age,activity,goal,income,experience)
-    VALUES (?,?,?,?,?,?,?)
+    (
+        telegram_id,
+        name,
+        age,
+        activity,
+        goal,
+        income,
+        experience,
+        day
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         telegram_id,
         name,
@@ -40,7 +50,46 @@ def save_user(
         activity,
         goal,
         income,
-        experience
+        experience,
+        1
     ))
+
+    conn.commit()
+
+
+def get_user(telegram_id):
+
+    cursor.execute("""
+    SELECT *
+    FROM users
+    WHERE telegram_id = ?
+    """, (telegram_id,))
+
+    return cursor.fetchone()
+
+
+def get_day(telegram_id):
+
+    cursor.execute("""
+    SELECT day
+    FROM users
+    WHERE telegram_id = ?
+    """, (telegram_id,))
+
+    row = cursor.fetchone()
+
+    if row:
+        return row[0]
+
+    return 1
+
+
+def next_day(telegram_id):
+
+    cursor.execute("""
+    UPDATE users
+    SET day = day + 1
+    WHERE telegram_id = ?
+    """, (telegram_id,))
 
     conn.commit()
