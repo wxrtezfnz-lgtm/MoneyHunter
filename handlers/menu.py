@@ -12,11 +12,35 @@ async def home(message: Message):
     )
 
 
-@router.message(lambda m: m.text == "👤 Профиль")
+from database.db import get_profile
+
+
+@router.message(F.text == "👤 Профиль")
 async def profile(message: Message):
+
+    user = get_profile(message.from_user.id)
+
+    if not user:
+        await message.answer(
+            "Сначала пройди регистрацию через /start 😊"
+        )
+        return
+
     await message.answer(
-        "👤 Профиль\n\n"
-        "Пока находится в разработке."
+
+        f"👤 <b>{user['name']}</b>\n\n"
+
+        f"⭐ Уровень: <b>{user['level']}</b>\n"
+        f"⚡ XP: <b>{user['xp']}</b>\n"
+        f"🔥 Серия: <b>{user['streak']}</b>\n"
+        f"🏆 Достижения: <b>{user['achievements']}</b>\n"
+        f"📅 День курса: <b>{user['day']}/30</b>\n\n"
+
+        f"🎯 Цель: {user['goal']}\n"
+        f"💰 Доход: {user['income']}\n"
+        f"🧠 Опыт: {user['experience']}",
+
+        parse_mode="HTML"
     )
 
 
