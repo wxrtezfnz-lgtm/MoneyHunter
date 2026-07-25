@@ -1,5 +1,6 @@
-from aiogram import Router
+
 from aiogram.types import Message
+from aiogram import Router, F
 
 router = Router()
 
