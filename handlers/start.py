@@ -12,6 +12,7 @@ from keyboards.goal_keyboard import goal_keyboard
 from keyboards.income_keyboard import income_keyboard
 from keyboards.experience_keyboard import experience_keyboard
 from keyboards.progress_keyboard import progress_keyboard
+from keyboards.menu_keyboard import menu_keyboard
 
 from database.db import save_user
 from services.advisor import generate_plan
@@ -139,14 +140,14 @@ async def get_experience(message: Message, state: FSMContext):
     )
 
     await message.answer(
-    build_day(1),
-    parse_mode="HTML",
-    reply_markup=progress_keyboard
-)
+        build_day(1),
+        parse_mode="HTML",
+        reply_markup=progress_keyboard
+    )
 
-from keyboards.menu_keyboard import menu_keyboard
+    await message.answer(
+        "🎉 Добро пожаловать в Money Hunter!",
+        reply_markup=menu_keyboard
+    )
 
-await message.answer(
-    "🎉 Добро пожаловать в Money Hunter!",
-    reply_markup=menu_keyboard
-)
+    await state.clear()
