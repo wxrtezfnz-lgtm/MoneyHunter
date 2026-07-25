@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 
 from handlers.start import router as start_router
 from handlers.progress import router as progress_router
+from handlers.menu import router as menu_router
 
 load_dotenv()
 
@@ -17,6 +18,7 @@ dp = Dispatcher()
 # Подключаем роутеры
 dp.include_router(start_router)
 dp.include_router(progress_router)
+dp.include_router(menu_router)
 
 
 async def main():
