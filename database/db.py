@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS users(
     level INTEGER DEFAULT 1,
     xp INTEGER DEFAULT 0,
     streak INTEGER DEFAULT 1,
-    achievements INTEGER DEFAULT 0
+    achievements TEXT DEFAULT ''
 
 )
 """)
