@@ -131,3 +131,28 @@ def next_day(telegram_id):
     )
 
     conn.commit()
+
+def get_profile(telegram_id):
+
+    cursor.execute(
+        """
+        SELECT
+            name,
+            goal,
+            income,
+            experience,
+            day,
+            level,
+            xp,
+            streak,
+            achievements
+
+        FROM users
+
+        WHERE telegram_id=%s
+        """,
+
+        (telegram_id,)
+    )
+
+    return cursor.fetchone()
