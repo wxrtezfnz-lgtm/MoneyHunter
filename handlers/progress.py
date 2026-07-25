@@ -8,9 +8,11 @@ from database.db import (
     update_level,
     unlock_achievement
 )
+
 from services.day_builder import build_day
-from keyboards.progress_keyboard import progress_keyboard
 from services.achievements import ACHIEVEMENTS
+from keyboards.progress_keyboard import progress_keyboard
+
 router = Router()
 
 
@@ -31,32 +33,34 @@ async def next_day_callback(callback: CallbackQuery):
         await callback.answer("Курс завершён 🎉")
         return
 
-    # увеличиваем день
+    # следующий день
     next_day(callback.from_user.id)
-add_xp(callback.from_user.id, 50)
-update_level(callback.from_user.id)
 
-day = get_day(callback.from_user.id)
+    # XP
+    add_xp(callback.from_user.id, 50)
 
-# первое достижение
-if day == 2:
+    # уровень
+    update_level(callback.from_user.id)
 
-    if unlock_achievement(callback.from_user.id, "first_day"):
+    day = get_day(callback.from_user.id)
 
-        achievement = ACHIEVEMENTS["first_day"]
+    # первое достижение
+    if day == 2:
 
-        await callback.message.answer(
+        if unlock_achievement(callback.from_user.id, "first_day"):
 
-            f"🏆 <b>Новое достижение!</b>\n\n"
+            achievement = ACHIEVEMENTS["first_day"]
 
-            f"{achievement['title']}\n\n"
+            await callback.message.answer(
 
-            f"{achievement['description']}",
+                f"🏆 <b>Новое достижение!</b>\n\n"
 
-            parse_mode="HTML"
-        )
+                f"{achievement['title']}\n\n"
 
-    
+                f"{achievement['description']}",
+
+                parse_mode="HTML"
+            )
 
     progress = int(day / 30 * 100)
 
