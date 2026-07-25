@@ -1,19 +1,37 @@
-import sqlite3
+import os
+import psycopg
+from psycopg.rows import dict_row
 
-conn = sqlite3.connect("moneyhunter.db")
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+conn = psycopg.connect(
+    DATABASE_URL,
+    row_factory=dict_row
+)
+
 cursor = conn.cursor()
 
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS users(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    telegram_id INTEGER,
+
+    id SERIAL PRIMARY KEY,
+
+    telegram_id BIGINT UNIQUE,
+
     name TEXT,
     age TEXT,
     activity TEXT,
     goal TEXT,
     income TEXT,
     experience TEXT,
-    day INTEGER DEFAULT 1
+
+    day INTEGER DEFAULT 1,
+
+    level INTEGER DEFAULT 1,
+    xp INTEGER DEFAULT 0,
+    streak INTEGER DEFAULT 1,
+    achievements INTEGER DEFAULT 0
+
 )
 """)
 
@@ -31,6 +49,7 @@ def save_user(
 ):
 
     cursor.execute("""
+
     INSERT INTO users
     (
         telegram_id,
@@ -39,19 +58,33 @@ def save_user(
         activity,
         goal,
         income,
-        experience,
-        day
+        experience
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
+
+    VALUES
+    (%s,%s,%s,%s,%s,%s,%s)
+
+    ON CONFLICT (telegram_id)
+
+    DO UPDATE SET
+
+        name=EXCLUDED.name,
+        age=EXCLUDED.age,
+        activity=EXCLUDED.activity,
+        goal=EXCLUDED.goal,
+        income=EXCLUDED.income,
+        experience=EXCLUDED.experience
+
+    """,
+
+    (
         telegram_id,
         name,
         age,
         activity,
         goal,
         income,
-        experience,
-        1
+        experience
     ))
 
     conn.commit()
@@ -59,37 +92,42 @@ def save_user(
 
 def get_user(telegram_id):
 
-    cursor.execute("""
-    SELECT *
-    FROM users
-    WHERE telegram_id = ?
-    """, (telegram_id,))
+    cursor.execute(
+        "SELECT * FROM users WHERE telegram_id=%s",
+        (telegram_id,)
+    )
 
     return cursor.fetchone()
 
 
 def get_day(telegram_id):
 
-    cursor.execute("""
-    SELECT day
-    FROM users
-    WHERE telegram_id = ?
-    """, (telegram_id,))
+    cursor.execute(
+        "SELECT day FROM users WHERE telegram_id=%s",
+        (telegram_id,)
+    )
 
     row = cursor.fetchone()
 
     if row:
-        return row[0]
+        return row["day"]
 
     return 1
 
 
 def next_day(telegram_id):
 
-    cursor.execute("""
-    UPDATE users
-    SET day = day + 1
-    WHERE telegram_id = ?
-    """, (telegram_id,))
+    cursor.execute(
+
+        """
+        UPDATE users
+
+        SET day = day + 1
+
+        WHERE telegram_id=%s
+        """,
+
+        (telegram_id,)
+    )
 
     conn.commit()
