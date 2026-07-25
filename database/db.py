@@ -260,3 +260,25 @@ def unlock_achievement(telegram_id, achievement):
 
     return True
 
+def get_achievements(telegram_id):
+
+    cursor.execute(
+        """
+        SELECT achievements
+
+        FROM users
+
+        WHERE telegram_id=%s
+        """,
+
+        (telegram_id,)
+    )
+
+    row = cursor.fetchone()
+
+    if not row:
+        return []
+
+    achievements = row["achievements"] or ""
+
+    return [x for x in achievements.split(",") if x]
