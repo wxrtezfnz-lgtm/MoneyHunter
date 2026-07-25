@@ -213,3 +213,50 @@ def update_level(telegram_id):
 
     conn.commit()
 
+def unlock_achievement(telegram_id, achievement):
+
+    cursor.execute(
+        """
+        SELECT achievements
+
+        FROM users
+
+        WHERE telegram_id=%s
+        """,
+
+        (telegram_id,)
+    )
+
+    row = cursor.fetchone()
+
+    if not row:
+        return False
+
+    current = row["achievements"] or ""
+
+    items = [x for x in current.split(",") if x]
+
+    if achievement in items:
+        return False
+
+    items.append(achievement)
+
+    new_value = ",".join(items)
+
+    cursor.execute(
+
+        """
+        UPDATE users
+
+        SET achievements=%s
+
+        WHERE telegram_id=%s
+        """,
+
+        (new_value, telegram_id)
+    )
+
+    conn.commit()
+
+    return True
+
