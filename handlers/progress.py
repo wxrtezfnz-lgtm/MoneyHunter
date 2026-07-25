@@ -1,7 +1,7 @@
 from aiogram import Router
 from aiogram.types import CallbackQuery
 
-from database.db import get_day, next_day, add_xp
+from database.db import get_day, next_day, add_xp, update_level
 from services.day_builder import build_day
 from keyboards.progress_keyboard import progress_keyboard
 
@@ -28,6 +28,7 @@ async def next_day_callback(callback: CallbackQuery):
     # увеличиваем день
     next_day(callback.from_user.id)
     add_xp(callback.from_user.id, 50)
+    update_level(callback.from_user.id)
     day = get_day(callback.from_user.id)
 
     
