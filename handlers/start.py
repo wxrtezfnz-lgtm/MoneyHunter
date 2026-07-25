@@ -3,17 +3,19 @@ from aiogram.filters import CommandStart
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
+import asyncio
+
 from states.user_state import UserState
 
 from keyboards.main_keyboard import activity_keyboard
 from keyboards.goal_keyboard import goal_keyboard
 from keyboards.income_keyboard import income_keyboard
 from keyboards.experience_keyboard import experience_keyboard
+from keyboards.progress_keyboard import progress_keyboard
 
 from database.db import save_user
 from services.advisor import generate_plan
-
-import asyncio
+from services.tasks import get_task
 
 router = Router()
 
@@ -48,7 +50,8 @@ async def get_age(message: Message, state: FSMContext):
 
     if not message.text.isdigit():
         await message.answer(
-            "❌ Возраст должен быть числом.\n\nНапример: 19"
+            "❌ Возраст должен быть числом.\n\n"
+            "Например: 19"
         )
         return
 
@@ -133,6 +136,12 @@ async def get_experience(message: Message, state: FSMContext):
     await status.edit_text(
         plan,
         parse_mode="HTML"
+    )
+
+    await message.answer(
+        get_task(1),
+        parse_mode="HTML",
+        reply_markup=progress_keyboard
     )
 
     await state.clear()
