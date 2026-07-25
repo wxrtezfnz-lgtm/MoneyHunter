@@ -174,3 +174,42 @@ def add_xp(telegram_id, xp):
 
     conn.commit()
 
+
+def update_level(telegram_id):
+
+    cursor.execute(
+        """
+        SELECT xp
+
+        FROM users
+
+        WHERE telegram_id=%s
+        """,
+
+        (telegram_id,)
+    )
+
+    row = cursor.fetchone()
+
+    if not row:
+        return
+
+    xp = row["xp"]
+
+    level = (xp // 100) + 1
+
+    cursor.execute(
+
+        """
+        UPDATE users
+
+        SET level=%s
+
+        WHERE telegram_id=%s
+        """,
+
+        (level, telegram_id)
+    )
+
+    conn.commit()
+
