@@ -2,6 +2,7 @@ import os
 import psycopg
 from psycopg.rows import dict_row
 
+
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 conn = psycopg.connect(
@@ -156,3 +157,20 @@ def get_profile(telegram_id):
     )
 
     return cursor.fetchone()
+
+def add_xp(telegram_id, xp):
+
+    cursor.execute(
+        """
+        UPDATE users
+
+        SET xp = xp + %s
+
+        WHERE telegram_id = %s
+        """,
+
+        (xp, telegram_id)
+    )
+
+    conn.commit()
+
