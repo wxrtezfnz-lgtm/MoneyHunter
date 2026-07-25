@@ -15,7 +15,7 @@ from keyboards.progress_keyboard import progress_keyboard
 
 from database.db import save_user
 from services.advisor import generate_plan
-from services.tasks import get_task
+from services.day_builder import build_day
 
 router = Router()
 
@@ -139,9 +139,7 @@ async def get_experience(message: Message, state: FSMContext):
     )
 
     await message.answer(
-        get_task(1),
-        parse_mode="HTML",
-        reply_markup=progress_keyboard
-    )
-
-    await state.clear()
+    build_day(1),
+    parse_mode="HTML",
+    reply_markup=progress_keyboard
+)
