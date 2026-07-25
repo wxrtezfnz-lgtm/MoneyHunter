@@ -1,10 +1,16 @@
 from aiogram import Router
 from aiogram.types import CallbackQuery
 
-from database.db import get_day, next_day, add_xp, update_level
+from database.db import (
+    get_day,
+    next_day,
+    add_xp,
+    update_level,
+    unlock_achievement
+)
 from services.day_builder import build_day
 from keyboards.progress_keyboard import progress_keyboard
-
+from services.achievements import ACHIEVEMENTS
 router = Router()
 
 
@@ -27,9 +33,28 @@ async def next_day_callback(callback: CallbackQuery):
 
     # увеличиваем день
     next_day(callback.from_user.id)
-    add_xp(callback.from_user.id, 50)
-    update_level(callback.from_user.id)
-    day = get_day(callback.from_user.id)
+add_xp(callback.from_user.id, 50)
+update_level(callback.from_user.id)
+
+day = get_day(callback.from_user.id)
+
+# первое достижение
+if day == 2:
+
+    if unlock_achievement(callback.from_user.id, "first_day"):
+
+        achievement = ACHIEVEMENTS["first_day"]
+
+        await callback.message.answer(
+
+            f"🏆 <b>Новое достижение!</b>\n\n"
+
+            f"{achievement['title']}\n\n"
+
+            f"{achievement['description']}",
+
+            parse_mode="HTML"
+        )
 
     
 
