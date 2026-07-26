@@ -1,7 +1,8 @@
 from aiogram import Router, F
 from aiogram.types import Message
 
-from database.db import get_profile
+from database.db import get_profile, get_achievements
+from services.achievements import ACHIEVEMENTS
 
 router = Router()
 
@@ -27,14 +28,11 @@ async def profile(message: Message):
     need = next_level_xp - current_level_xp
 
     bars = int((progress / need) * 10)
-
-    if bars > 10:
-        bars = 10
-
-    if bars < 0:
-        bars = 0
+    bars = max(0, min(10, bars))
 
     bar = "█" * bars + "░" * (10 - bars)
+
+    achievements = get_achievements(message.from_user.id)
 
     await message.answer(
 
@@ -46,7 +44,7 @@ async def profile(message: Message):
         f"{bar} {progress}/{need}\n\n"
 
         f"🔥 Серия: <b>{user['streak']}</b>\n"
-        f"🏆 Достижения: <b>{user['achievements']}</b>\n"
+        f"🏆 Достижения: <b>{len(achievements)}</b>\n"
         f"📅 День курса: <b>{user['day']}/30</b>\n\n"
 
         f"🎯 Цель: {user['goal']}\n"
@@ -54,4 +52,48 @@ async def profile(message: Message):
         f"🧠 Опыт: {user['experience']}",
 
         parse_mode="HTML"
+    )
+
+
+@router.message(F.text == "🏠 Главная")
+async def home(message: Message):
+
+    await message.answer(
+        "🏠 Добро пожаловать обратно!"
+    )
+
+
+@router.message(F.text == "🎯 Моё задание")
+async def task(message: Message):
+
+    await message.answer(
+        "🎯 Здесь скоро будет открываться текущее задание."
+    )
+
+
+@router.message(F.text == "🏆 Достижения")
+async def achievements(message: Message):
+
+    opened = get_achievements(message.from_user.id)
+
+    text = "🏆 <b>Достижения</b>\n\n"
+
+    for key, value in ACHIEVEMENTS.items():
+
+        if key in opened:
+            text += f"🟢 {value['title']}\n"
+        else:
+            text += f"⚪ {value['title']}\n"
+
+    await message.answer(
+        text,
+        parse_mode="HTML"
+    )
+
+
+@router.message(F.text == "⚙️ Настройки")
+async def settings(message: Message):
+
+    await message.answer(
+        "⚙️ Настройки пока находятся в разработке."
     )
