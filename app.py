@@ -1,97 +1,59 @@
-from aiogram import Router, F
-from aiogram.types import Message
+import asyncio
+import os
 
-from database.db import get_profile, get_achievements
-from services.achievements import ACHIEVEMENTS
+print("1")
 
-router = Router()
+from aiogram import Bot, Dispatcher
 
+print("2")
 
-@router.message(F.text == "👤 Профиль")
-async def profile(message: Message):
+from dotenv import load_dotenv
 
-    user = get_profile(message.from_user.id)
+print("3")
 
-    if not user:
-        await message.answer(
-            "Сначала пройди регистрацию через /start 😊"
-        )
-        return
+from handlers.start import router as start_router
 
-    xp = user["xp"]
-    level = user["level"]
+print("4")
 
-    current_level_xp = (level - 1) * 100
-    next_level_xp = level * 100
+from handlers.progress import router as progress_router
 
-    progress = xp - current_level_xp
-    need = next_level_xp - current_level_xp
+print("5")
 
-    bars = int((progress / need) * 10)
-    bars = max(0, min(10, bars))
+from handlers.menu import router as menu_router
 
-    bar = "█" * bars + "░" * (10 - bars)
+print("6")
 
-    await message.answer(
+load_dotenv()
 
-        f"👤 <b>{user['name']}</b>\n\n"
+TOKEN = os.getenv("BOT_TOKEN")
 
-        f"⭐️ <b>Уровень {level}</b>\n"
+print("7")
 
-        f"⚡️ XP: <b>{xp}</b>\n"
-        f"{bar} {progress}/{need}\n\n"
+bot = Bot(token=TOKEN)
 
-        f"🔥 Серия: <b>{user['streak']}</b>\n"
-        f"🏆 Достижения: <b>{len(get_achievements(message.from_user.id))}</b>\n"
-        f"📅 День курса: <b>{user['day']}/30</b>\n\n"
+print("8")
 
-        f"🎯 Цель: {user['goal']}\n"
-        f"💰 Доход: {user['income']}\n"
-        f"🧠 Опыт: {user['experience']}",
+dp = Dispatcher()
 
-        parse_mode="HTML"
-    )
+print("9")
+
+dp.include_router(start_router)
+
+print("10")
+
+dp.include_router(progress_router)
+
+print("11")
+
+dp.include_router(menu_router)
+
+print("12")
 
 
-@router.message(F.text == "🏠 Главная")
-async def home(message: Message):
-
-    await message.answer(
-        "🏠 Добро пожаловать обратно!"
-    )
+async def main():
+    print("✅ Бот запущен")
+    await dp.start_polling(bot)
 
 
-@router.message(F.text == "🎯 Моё задание")
-async def task(message: Message):
-
-    await message.answer(
-        "🎯 Скоро здесь будет открываться текущее задание."
-    )
-
-
-@router.message(F.text == "🏆 Достижения")
-async def achievements(message: Message):
-
-    opened = get_achievements(message.from_user.id)
-
-    text = "🏆 <b>Достижения</b>\n\n"
-
-    for key, value in ACHIEVEMENTS.items():
-
-        if key in opened:
-            text += f"🟢 {value['title']}\n"
-        else:
-            text += f"⚪ {value['title']}\n"
-
-    await message.answer(
-        text,
-        parse_mode="HTML"
-    )
-
-
-@router.message(F.text == "⚙️ Настройки")
-async def settings(message: Message):
-
-    await message.answer(
-        "⚙️ Настройки пока находятся в разработке."
-    )
+if __name__ == "__main__":
+    asyncio.run(main())
